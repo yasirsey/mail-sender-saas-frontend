@@ -15,6 +15,8 @@ import {
     ImportContactsResponse,
     SendMailRequest,
     SendMailResponse,
+    AsyncSendMailResponse,
+    BatchStatusResponse,
     MailLog
 } from '@/types';
 
@@ -140,8 +142,19 @@ export const contactsApi = {
 
 // Email Sending API
 export const mailApi = {
-    send: async (data: SendMailRequest): Promise<SendMailResponse> => {
+    send: async (data: SendMailRequest): Promise<AsyncSendMailResponse> => {
+        const response = await api.post<AsyncSendMailResponse>('/mail/send-async', data);
+        return response.data;
+    },
+
+    // Legacy sync endpoint (deprecated)
+    sendSync: async (data: SendMailRequest): Promise<SendMailResponse> => {
         const response = await api.post<SendMailResponse>('/mail/send', data);
+        return response.data;
+    },
+
+    getBatchStatus: async (batchId: string): Promise<BatchStatusResponse> => {
+        const response = await api.get<BatchStatusResponse>(`/mail/batch/${batchId}/status`);
         return response.data;
     },
 

@@ -11,7 +11,6 @@ import { Send, Mail, ArrowLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import {
@@ -159,7 +158,7 @@ export default function SendEmailPage() {
             if (data.templateData && data.templateData.trim() !== '') {
                 try {
                     templateDataObj = JSON.parse(data.templateData);
-                } catch (e) {
+                } catch {
                     toast.error('Invalid template data JSON format');
                     setSending(false);
                     return;
@@ -187,12 +186,30 @@ export default function SendEmailPage() {
 
             const result = await mailApi.send(sendData);
 
-            if (result.success) {
-                toast.success(`Email sent successfully to ${result.logs.filter(log => log.status === 'sent').length} recipients`);
-                router.push('/dashboard/logs');
-            } else {
-                toast.error('Failed to send email to some or all recipients');
+            // Show detailed validation results
+            const { validationResults } = result;
+            let message = `Email queued successfully! `;
+            message += `${validationResults.valid} valid emails will be sent.`;
+            
+            if (validationResults.invalid > 0) {
+                message += ` ${validationResults.invalid} invalid emails were skipped.`;
             }
+            
+            if (validationResults.disposable > 0) {
+                message += ` ${validationResults.disposable} disposable emails were blocked.`;
+            }
+            
+            if (validationResults.noMxRecord > 0) {
+                message += ` ${validationResults.noMxRecord} emails had no MX record.`;
+            }
+
+            toast.success(message);
+            
+            // Store batch ID for tracking
+            sessionStorage.setItem('lastBatchId', result.batchId);
+            
+            // Redirect to logs page
+            router.push('/dashboard/logs');
         } catch (error) {
             console.error('Failed to send email:', error);
             toast.error('Failed to send email');

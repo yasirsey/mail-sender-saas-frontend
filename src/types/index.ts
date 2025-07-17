@@ -114,6 +114,29 @@ export interface SendMailResponse {
     logs: MailLog[];
 }
 
+// Async email sending response
+export interface AsyncSendMailResponse {
+    batchId: string;
+    message: string;
+    validationResults: {
+        total: number;
+        valid: number;
+        invalid: number;
+        disposable: number;
+        noMxRecord: number;
+    };
+}
+
+// Batch status response
+export interface BatchStatusResponse {
+    batchId: string;
+    total: number;
+    sent: number;
+    failed: number;
+    pending: number;
+    logs: MailLog[];
+}
+
 // Mail log related types
 export interface MailLog {
     id: string;
