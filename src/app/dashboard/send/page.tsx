@@ -165,9 +165,9 @@ export default function SendEmailPage() {
                 }
             }
 
-            // Split recipients by comma
+            // Split recipients by comma and newline
             const recipientsList = data.recipients
-                .split(',')
+                .split(/[,\n]/)
                 .map(email => email.trim())
                 .filter(email => email !== '');
 
@@ -177,12 +177,17 @@ export default function SendEmailPage() {
                 return;
             }
 
+            console.log('📧 Recipients array:', recipientsList);
+            console.log('📧 Recipients count:', recipientsList.length);
+
             const sendData: SendMailRequest = {
                 templateId: data.templateId,
                 smtpConfigId: data.smtpConfigId,
                 recipients: recipientsList,
                 templateData: Object.keys(templateDataObj).length > 0 ? templateDataObj : undefined,
             };
+
+            console.log('📧 Send data:', sendData);
 
             const result = await mailApi.send(sendData);
 
